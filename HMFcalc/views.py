@@ -3,8 +3,8 @@ from django.http import HttpResponse , HttpResponseRedirect
 # from django.utils.encoding import iri_to_uri
 # from django.core.context_processors import csrf
 # from django.template import RequestContext
-import utils
-import forms
+from . import utils
+from . import forms
 from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 # from django.core.files.base import ContentFile
@@ -12,7 +12,7 @@ from django.views.generic.base import TemplateView
 # import numpy as np
 import datetime
 # import logging
-import StringIO
+import io
 import zipfile
 # import time
 import os
@@ -201,7 +201,7 @@ class HMFInputBase(FormView):
         objects, labels, warnings = utils.hmf_driver(label, transfer_fit, transfer_options, **form.cleaned_data)
 #         distances = utils.cosmography(cosmology_list, form.cleaned_data['cp_label'], form.cleaned_data['z'], growth)
 
-        print "LABEL IN VIEWS: ", label
+        print("LABEL IN VIEWS: ", label)
         if self.request.path.endswith('add/'):
             self.request.session["objects"].extend(objects)
             self.request.session["labels"].extend(labels)
@@ -218,7 +218,7 @@ class HMFInputBase(FormView):
             self.request.session['warnings'] = warnings
             self.request.session["base_labels"] = [label]
 
-        print self.request.session["base_labels"]
+        print(self.request.session["base_labels"])
         return super(HMFInputBase, self).form_valid(form)
 
 
@@ -411,7 +411,7 @@ def plots(request, filetype, plottype):
         canvas.print_pdf(response)
 
     elif filetype == 'zip':
-        response = StringIO.StringIO()
+        response = io.StringIO()
         canvas.print_pdf(response)
 
     return response
@@ -436,8 +436,8 @@ def header_txt(request):
         response.write('=====================================================\n')
         response.write("   %s\n" % (labels[i]))
         response.write('=====================================================\n')
-        print "KEYS: ", o._Cache__recalc_par_prop.keys()
-        for k in o._Cache__recalc_par_prop.keys():
+        print("KEYS: ", list(o._Cache__recalc_par_prop.keys()))
+        for k in list(o._Cache__recalc_par_prop.keys()):
             response.write("%s: %s \n" % (k, getattr(o, k)))
         response.write("\n")
 #
@@ -481,12 +481,12 @@ def data_output(request):
     # Open up file-like objects for response
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=all_plots.zip'
-    buff = StringIO.StringIO()
+    buff = io.StringIO()
     archive = zipfile.ZipFile(buff, 'w', zipfile.ZIP_DEFLATED)
 
     # Write out mass-based and k-based data files
     for i, o in enumerate(objects):
-        s = StringIO.StringIO()
+        s = io.StringIO()
 
         # MASS BASED
         s.write("# [1] m:            [M_sun/h] \n")
@@ -509,7 +509,7 @@ def data_output(request):
         archive.writestr('mVector_%s.txt' % labels[i], s.getvalue())
 
         s.close()
-        s = StringIO.StringIO()
+        s = io.StringIO()
 
         # K BASED
         s.write("# [1] k:    [h/Mpc] \n")
@@ -538,12 +538,12 @@ def halogen(request):
     # Open up file-like objects for response
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=halogen.zip'
-    buff = StringIO.StringIO()
+    buff = io.StringIO()
     archive = zipfile.ZipFile(buff, 'w', zipfile.ZIP_DEFLATED)
 
     # Write out ngtm and lnP data files
     for i, o in enumerate(objects):
-        s = StringIO.StringIO()
+        s = io.StringIO()
 
         # MASS BASED
         out = np.array([o.M, o.ngtm]).T
@@ -552,7 +552,7 @@ def halogen(request):
         archive.writestr('ngtm_%s.txt' % labels[i], s.getvalue())
 
         s.close()
-        s = StringIO.StringIO()
+        s = io.StringIO()
 
         # K BASED
         out = np.log10(np.exp(np.array([o.lnk, o.power]))).T

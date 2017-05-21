@@ -12,7 +12,7 @@ import cosmolopy.distance as cd
 # import pandas
 import os
 import matplotlib.ticker as tick
-import StringIO
+import io
 import copy
 # TODO: labels across adds are allllll wrong.
 # TODO: cosmography doesn't do all redshifts if added at once on an add??
@@ -26,7 +26,7 @@ def hmf_driver(label, transfer_fit,
 
     # Set up a logger
     hmflog = logging.getLogger("hmf")
-    stream = StringIO.StringIO()
+    stream = io.StringIO()
     ch = logging.StreamHandler(stream)
     hmflog.addHandler(ch)
 
